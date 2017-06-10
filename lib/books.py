@@ -22,8 +22,8 @@ def make_wallet():
 
 def read_wallet():
     fname = "{dir}{name}.txt".format(dir=user_dir, name=ACCOUNT_NAME)
-    with open(fname, "rb") as text_file:
-        priv = text_file.read()
+    with open(fname, "r") as text_file:
+        priv = str(text_file.read())
     pub = bitcoin.privtopub(priv)
     addr = bitcoin.pubtoaddr(pub)
     return priv, pub, addr
@@ -75,12 +75,19 @@ def get_postings():
                 canceled_postings.append((poster, isbn))
             else:
                 postings.append((poster, isbn, price, quality))
-        print 8888812333, postings
     for posting in postings:
-        print ('8888'), (posting[0], posting[1])
         if (posting[0], posting[1]) not in canceled_postings:
             current_postings.append(posting)
     return list(set(current_postings))
+
+
+def get_balance():
+    priv, pub, addr = read_wallet()
+    inputs = bitcoin.unspent(addr)
+    balance = 0
+    for input in inputs:
+        balance += input['value']
+    return balance
 
 
 def build_cancelation(isbn):
@@ -101,3 +108,10 @@ def post_book(isbn, price, quality):
     inputs = bitcoin.unspent(addr)
     signed_tx = build_tx(inputs, priv, addr, script, send=True)
     return signed_tx
+
+def book_lookup(isbn):
+    book = isbnlib.meta(isbn)
+    title = book['Title']
+    authors = ' '.join(book['Authors'])
+    return title, authors
+
