@@ -1,3 +1,5 @@
+"""CLI for bitbooks"""
+
 import click
 import books
 import messaging
