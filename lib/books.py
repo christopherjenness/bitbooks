@@ -2,17 +2,15 @@ import os
 import binascii
 import isbnlib
 import bitcoin
-
-MARKET_ADDRESS = "18VJ5dy5YR6bK8H5EFb2o6dFz3pKaze8Ns"
-ACCOUNT_NAME = "MAIN-ACCOUNT"
-user_dir = os.path.expanduser('~') + "/.book-lib/wallets/"
+import settings
 
 
 def make_wallet():
     priv = bitcoin.random_key()
     pub = bitcoin.privtopub(priv)
     addr = bitcoin.pubtoaddr(pub)
-    fname = "{dir}{name}.txt".format(dir=user_dir, name=ACCOUNT_NAME)
+    fname = "{dir}wallets/{name}.txt".format(dir=settings.user_dir,
+                                             name=settings.ACCOUNT_NAME)
     # This needs to be encrypted with password
     if not os.path.isfile(fname):
         with open(fname, "wb") as text_file:
@@ -21,7 +19,8 @@ def make_wallet():
 
 
 def read_wallet():
-    fname = "{dir}{name}.txt".format(dir=user_dir, name=ACCOUNT_NAME)
+    fname = "{dir}wallets/{name}.txt".format(dir=settings.user_dir,
+                                             name=settings.ACCOUNT_NAME)
     with open(fname, "r") as text_file:
         priv = str(text_file.read())
     pub = bitcoin.privtopub(priv)
@@ -40,7 +39,7 @@ def encode_OP_RETURN(isbn, price, quality):
 
 
 def build_tx(inputs, priv, addr, script, fee=0, send=False):
-    outputs = [{'value': 546, 'address': MARKET_ADDRESS},
+    outputs = [{'value': 546, 'address': settings.MARKET_ADDRESS},
                {'value': 0, 'script': script}]
     fee = fee
     tx = bitcoin.mksend(inputs[0], outputs, addr, fee)
@@ -54,7 +53,7 @@ def get_postings():
     postings = []
     canceled_postings = []
     current_postings = []
-    txs = bitcoin.history(MARKET_ADDRESS)
+    txs = bitcoin.history(settings.MARKET_ADDRESS)
     for tx in txs:
         poster, isbn, price = None, None, None
         fetched = bitcoin.fetchtx(tx['output'].split(':')[0])
@@ -109,9 +108,9 @@ def post_book(isbn, price, quality):
     signed_tx = build_tx(inputs, priv, addr, script, send=True)
     return signed_tx
 
+
 def book_lookup(isbn):
     book = isbnlib.meta(isbn)
     title = book['Title']
     authors = ' '.join(book['Authors'])
     return title, authors
-
