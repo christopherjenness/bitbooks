@@ -20,6 +20,9 @@ def make_wallet():
     fname = "{dir}wallets/{name}.txt".format(dir=settings.user_dir,
                                              name=settings.ACCOUNT_NAME)
     # This needs to be encrypted with password
+    directory = "{dir}wallets/".format(dir=settings.user_dir)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
     if not os.path.isfile(fname):
         with open(fname, "wb") as text_file:
             text_file.write(priv)
