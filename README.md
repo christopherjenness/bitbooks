@@ -47,6 +47,10 @@ To check your messages:
 
 ## Warnings
 
-Your wallet is saved unencrypted on your hardrive.  Do not send more than is needed to this wallet.  10 cents should be sufficient for most uses.
+Your wallet is saved unencrypted on your hardrive.  Do not send more than is needed to this wallet.  10 cents should be sufficient for most uses. 
 
 Messages are not encrypted.
+
+## Tips
+
+bitbooks does not depend on confirmed transactions.  That means you can load your wallet for free with unconfirmed transactions.
