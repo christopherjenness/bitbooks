@@ -1,14 +1,14 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="bitbooks",
     version='0.1',
-    py_modules=['cli', 'books', 'messaging', 'settings'],
+    packages=find_packages(),
     install_requires=[
         'Click',
     ],
     entry_points='''
         [console_scripts]
-        bitbooks=cli:cli
+        bitbooks=lib.cli:cli
     ''',
 )
