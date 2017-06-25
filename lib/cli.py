@@ -38,21 +38,24 @@ def wallet():
 @click.option('--quality', prompt='Quality (1-5)',
               help='Quality of book. 1-5 scale')
 def post(isbn, price, quality):
+    """Post a book for sale."""
     title, authors = books.book_lookup(isbn)
     click.echo("Your book is: {title} by {authors}".format(title=title,
                                                            authors=authors))
     click.echo("Sale price: {price}".format(price=price))
-    click.echo(("Quality: {quality},"
+    click.echo(("Quality: {quality}, "
                "{description}").format(quality=quality,
                                        description=QUALITY_DICT[quality]))
     if click.confirm('Do you want to post this book?'):
-        click.echo('We Sellin')
+        books.post_book(isbn, price, quality, send=True)
+        click.echo("We Sellin'")
     else:
         click.echo('nah')
 
 
 @cli.command()
 def balance():
+    """Displays your balance.  Balance is needed for transactions"""
     bal = books.get_balance()
     click.echo("Your balance is: {bal}".format(bal=bal))
 
@@ -61,12 +64,14 @@ def balance():
 @click.option('--isbn', prompt='ISBN to cancel',
               help='ISBN of book sale you want to remove')
 def cancel(isbn):
+    """Cancel a posting."""
     books.cancel_posting(isbn)
 
 
 @cli.command()
 @click.option('--sender', help='Address of sender', default=None)
 def getMessages(sender):
+    """Get your messages."""
     raw_message_dict = messaging.get_messages()
     message_dict = messaging.collapse_messages(raw_message_dict)
     if sender:
@@ -87,6 +92,7 @@ def getMessages(sender):
 @click.option('--message', prompt='Message',
               help='Message to send')
 def sendMessage(addr, message):
+    """Send a message"""
     counter = messaging._get_message_prefix(addr)
     message = messaging.encode_message(message, counter)
     messaging.send_message(addr, message, send=True)
@@ -95,9 +101,15 @@ def sendMessage(addr, message):
 
 @cli.command()
 def postings():
+    """Get posted books for sale"""
     postings = books.get_postings()
-    for posting in postings:
-        cli.echo(posting)
+    for sender, isbn, price, quality in postings:
+        title, author = books.book_lookup(isbn)
+        click.echo("BOOK    | {title}".format(title=title))
+        click.echo("BY      | {author}".format(author=author))
+        click.echo("PRICE   | {price}".format(price=price))
+        click.echo("QUALITY | {quality}".format(quality=QUALITY_DICT[quality]))
+        click.echo(" ")
 
 
 if __name__ == '__main__':
