@@ -87,7 +87,7 @@ def build_tx(inputs, priv, addr, script, fee=0, send=False):
     outputs = [{'value': 546, 'address': settings.MARKET_ADDRESS},
                {'value': 0, 'script': script}]
     fee = fee
-    tx = bitcoin.mksend(inputs[0], outputs, addr, fee)
+    tx = bitcoin.mksend(inputs, outputs, addr, fee)
     signed_tx = bitcoin.sign(tx, 0, priv)
     if send:
         bitcoin.pushtx(signed_tx)
@@ -110,11 +110,15 @@ def get_postings():
         poster, isbn, price = None, None, None
         fetched = bitcoin.fetchtx(tx['output'].split(':')[0])
         tx_outputs = bitcoin.deserialize(fetched)['outs']
+        tx_inputs = bitcoin.deserialize(bitcoin.fetchtx(bitcoin.deserialize(fetched)['ins'][0]['outpoint']['hash']))['outs']
+        for input in tx_inputs:
+            if input['script'].startswith('76a914'):
+                try:
+                    text = input['script'].lstrip('76a914').rstrip('88ac')
+                    poster = bitcoin.hex_to_b58check(text)
+                except:
+                    pass
         for output in tx_outputs:
-            if (output['script'].startswith('76a914') and
-                    output['value'] != 546):
-                text = output['script'].lstrip('76a914').rstrip('88ac')
-                poster = bitcoin.hex_to_b58check(text)
             if output['script'].startswith('6a'):
                 text = str(binascii.unhexlify(output['script'][2:]))
                 components = text.split('-')
@@ -152,7 +156,7 @@ def _build_cancelation(isbn):
     return encode_OP_RETURN(isbn, 0, 0)
 
 
-def cancel_posting(isbn):
+def cancel_posting(isbn, send=True):
     """
     Cancel a book sale that is already in the mempool.
     Useful if you have already sold the book.
@@ -166,11 +170,11 @@ def cancel_posting(isbn):
     priv, pub, addr = read_wallet()
     script = _build_cancelation(isbn)
     inputs = bitcoin.unspent(addr)
-    signed_tx = build_tx(inputs, priv, addr, script, send=True)
+    signed_tx = build_tx(inputs, priv, addr, script, send)
     return signed_tx
 
 
-def post_book(isbn, price, quality):
+def post_book(isbn, price, quality, send=True):
     """
     Post a book sale to the mempool.
 
@@ -183,7 +187,7 @@ def post_book(isbn, price, quality):
     priv, pub, addr = read_wallet()
     script = encode_OP_RETURN(isbn, price, quality)
     inputs = bitcoin.unspent(addr)
-    signed_tx = build_tx(inputs, priv, addr, script, send=True)
+    signed_tx = build_tx(inputs[0], priv, addr, script, send=send)
     return signed_tx
 
 

@@ -69,9 +69,13 @@ def send_message(recipient_addr, scripts, fee=0, send=False):
     for script in scripts:
         outputs = [{'value': 546, 'address': recipient_addr}]
         inputs = bitcoin.unspent(addr)
+        for _input in inputs:
+            if _input > 1092:
+                input_tx = _input
+                break
         outputs.append({'value': 0, 'script': script})
         fee = fee
-        tx = bitcoin.mksend(inputs[0], outputs, addr, fee)
+        tx = bitcoin.mksend(input_tx, outputs, addr, fee)
         signed_tx = bitcoin.sign(tx, 0, priv)
         if send:
             bitcoin.pushtx(signed_tx)
@@ -116,22 +120,26 @@ def get_messages():
         sender, message_num, submessage_num, message = None, None, None, None
         fetched = bitcoin.fetchtx(tx['output'].split(':')[0])
         tx_outputs = bitcoin.deserialize(fetched)['outs']
+        tx_inputs = bitcoin.deserialize(bitcoin.fetchtx(bitcoin.deserialize(fetched)['ins'][0]['outpoint']['hash']))['outs']
         for output in tx_outputs:
-            if (output['script'].startswith('76a914') and
-                    output['value'] != 546):
-                text = output['script'].lstrip('76a914').rstrip('88ac')
-                sender = bitcoin.hex_to_b58check(text)
             if output['script'].startswith('6a'):
                 text = str(binascii.unhexlify(output['script'].lstrip('6a')))
                 message_num = text[1]
                 submessage_num = text[2]
                 message = text[3:]
-            if sender and message:
-                if sender != addr:
-                    if sender not in messages:
-                        messages[sender] = defaultdict(dict)
-                    messages[sender][message_num].update({submessage_num:
-                                                          message})
+        for input in tx_inputs:
+            try:
+                if input['script'].startswith('76a914'):
+                    text = input['script'].lstrip('76a914').rstrip('88ac')
+                    sender = bitcoin.hex_to_b58check(text)
+            except:
+                pass
+        if sender and message:
+            if sender != addr:
+                if sender not in messages:
+                    messages[sender] = defaultdict(dict)
+                messages[sender][message_num].update({submessage_num:
+                                                      message})
     return messages
 
 
