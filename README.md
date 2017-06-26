@@ -1,4 +1,7 @@
 # bitbooks
+
+![travis](https://travis-ci.org/christopherjenness/bitbooks.svg?branch=master) [![Coverage Status](http://coveralls.io/repos/github/christopherjenness/bitbooks/badge.svg?branch=master)](https://coveralls.io/github/christopherjenness/bitbooks?branch=master)
+
 A decentralized, uncensorable marketplace for books.
 
 ## Overview
