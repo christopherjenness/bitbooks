@@ -65,7 +65,11 @@ def balance():
               help='ISBN of book sale you want to remove')
 def cancel(isbn):
     """Cancel a posting."""
-    books.cancel_posting(isbn)
+    title, authors = books.book_lookup(isbn)
+    click.echo("Your book is: {title} by {authors}".format(title=title,
+                                                           authors=authors))
+    if click.confirm('Do you want to cancel this book?'):
+        books.cancel_posting(isbn)
 
 
 @cli.command()
