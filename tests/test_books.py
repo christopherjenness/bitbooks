@@ -46,6 +46,7 @@ def test_get_postings():
 
 
 @mock.patch('bitcoin.unspent', new=data.mock_unspent)
+@mock.patch('lib.settings.ACCOUNT_NAME', new='TEST-ACCOUNT')
 def test_get_balance():
     balance = books.get_balance()
     assert balance == 2184
