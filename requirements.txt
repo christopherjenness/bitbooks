@@ -1,0 +1,5 @@
+mock==2.0.0
+setuptools==35.0.2
+isbnlib==3.7.1
+bitcoin==1.1.42
+click==6.7
