@@ -20,7 +20,12 @@ Alternatively, bitbooks supports writing data into the blockchain if you wish to
 
 ## Installation
 
-`python setup.py install`
+Unfortunately, bitbooks is not python 3 compatible.
+
+```bash
+pip install -r reqirements.txt
+python setup.py install
+```
 
 ## Usage
 
@@ -46,7 +51,11 @@ To send a message:
 
 To check your messages:
 
-`bitbooks checkmessages`
+`bitbooks getmessages`
+
+To check current book postings for sale:
+
+`bitbooks postings`
 
 ## Warnings
 
